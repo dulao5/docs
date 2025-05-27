@@ -21,7 +21,7 @@ The basic format of the URI is as follows:
 
     - `access-key`: Specifies the access key.
     - `secret-access-key`: Specifies the secret access key.
-    - `session-token`: Specifies the temporary session token. BR supports this parameter starting from v7.6.0.
+    - `session-token`: Specifies the temporary session token. TiDB supports this parameter starting from v7.6.0.
     - `use-accelerate-endpoint`: Specifies whether to use the accelerate endpoint on Amazon S3 (defaults to `false`).
     - `endpoint`: Specifies the URL of custom endpoint for S3-compatible services (for example, `<https://s3.example.com/>`).
     - `force-path-style`: Use path style access rather than virtual hosted style access (defaults to `true`).
@@ -29,26 +29,22 @@ The basic format of the URI is as follows:
     - `sse`: Specifies the server-side encryption algorithm used to encrypt the uploaded objects (value options: empty, `AES256`, or `aws:kms`).
     - `sse-kms-key-id`: Specifies the KMS ID if `sse` is set to `aws:kms`.
     - `acl`: Specifies the canned ACL of the uploaded objects (for example, `private` or `authenticated-read`).
-    - `role-arn`: When you need to access Amazon S3 data from a third party using a specified [IAM role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html), you can specify the corresponding [Amazon Resource Name (ARN)](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) of the IAM role with the `role-arn` URL query parameter, such as `arn:aws:iam::888888888888:role/my-role`. For more information about using an IAM role to access Amazon S3 data from a third party, see [AWS documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html). BR supports this parameter starting from v7.6.0.
-    - `external-id`: When you access Amazon S3 data from a third party, you might need to specify a correct [external ID](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user_externalid.html) to assume [the IAM role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html). In this case, you can use this `external-id` URL query parameter to specify the external ID and make sure that you can assume the IAM role. An external ID is an arbitrary string provided by the third party together with the IAM role ARN to access the Amazon S3 data. Providing an external ID is optional when assuming an IAM role, which means if the third party does not require an external ID for the IAM role, you can assume the IAM role and access the corresponding Amazon S3 data without providing this parameter.
+    - `role-arn`: When you need to access Amazon S3 data from a third party using a specified [IAM role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html), you can specify the corresponding [Amazon Resource Name (ARN)](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) of the IAM role with the `role-arn` URL query parameter, such as `arn:aws:iam::888888888888:role/my-role`. For more information about using an IAM role to access Amazon S3 data from TiDB Cloud, see [Configure External Storage Access for TiDB Cloud Dedicated](/tidbcloud/config-s3-and-gcs-access.md). TiDB supports this parameter starting from v7.6.0.
+    - `external-id`: When you access Amazon S3 data from TiDB Cloud, you must need to specify a correct [external ID](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user_externalid.html) to assume [the IAM role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html). In this case, you must use this `external-id` URL query parameter to specify the external ID and make sure that you can assume the IAM role.
 
-The following is an example of an Amazon S3 URI for TiDB Lightning and BR. In this example, you need to specify a specific file path `testfolder`.
+> **Note:**
+> When configuring the IAM role, make sure to explicitly specify the trusted AWS account ID in the Principal field, and always include a unique external-id condition to prevent unauthorized access via [confused deputy attacks](https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html).
+> You can find the TiDB Cloud AWS account ID in TiDB Cloud, and use AWS CloudFormation to create the IAM role securely in one click by following the linked documentation, see [Configure External Storage Access for TiDB Cloud Dedicated](/tidbcloud/config-s3-and-gcs-access.md).
+> Optionally, you may also set a max-session-duration to limit the lifetime of temporary credentials for enhanced security.
+> 
+
+The following is an example of an Amazon S3 URI for [`BACKUP`](/tidbcloud/sql-statement-backup.md) and [`RESTORE`](/tidbcloud/sql-statement-restore.md). In this example, you need to specify a specific file path `testfolder`.
 
 ```shell
 s3://external/testfolder?access-key=${access-key}&secret-access-key=${secret-access-key}
 ```
 
-The following is an example of an Amazon S3 URI for TiCDC `sink-uri`.
-
-```shell
-tiup cdc:v7.5.0 cli changefeed create \
-    --server=http://172.16.201.18:8300 \
-    --sink-uri="s3://cdc?endpoint=http://10.240.0.38:9000&access-key=${access-key}&secret-access-key=${secret-access-key}" \
-    --changefeed-id="cdcTest" \
-    --config=cdc_csv.toml
-```
-
-The following is an example of an Amazon S3 URI for [`IMPORT INTO`](/sql-statements/sql-statement-import-into.md). In this example, you need to specify a specific filename `test.csv`.
+The following is an example of an Amazon S3 URI for [`IMPORT INTO`](/tidbcloud/sql-statement-import-into.md). In this example, you need to specify a specific filename `test.csv`.
 
 ```shell
 s3://external/test.csv?access-key=${access-key}&secret-access-key=${secret-access-key}
@@ -70,7 +66,7 @@ The following is an example of a GCS URI for TiDB Lightning and BR. In this exam
 gcs://external/testfolder?credentials-file=${credentials-file-path}
 ```
 
-The following is an example of a GCS URI for [`IMPORT INTO`](/sql-statements/sql-statement-import-into.md). In this example, you need to specify a specific filename `test.csv`.
+The following is an example of a GCS URI for [`IMPORT INTO`](/tidbcloud/sql-statement-import-into.md). In this example, you need to specify a specific filename `test.csv`.
 
 ```shell
 gcs://external/test.csv?credentials-file=${credentials-file-path}
